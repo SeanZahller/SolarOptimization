@@ -1,30 +1,27 @@
 package com.example.solaroptimization;
 
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.Group;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.ImagePattern;
 
+import java.net.URL;
 import java.text.ParseException;
+import java.util.ResourceBundle;
 
-public class SkyBoxController {
+public class SkyBoxController implements Initializable{
 
     @FXML
     private AnchorPane skyboxPane;
 
-    public SkyBoxController(AnchorPane skyboxPane){
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
 
-        this.skyboxPane = skyboxPane; //I Dont know if this is connecting to the FXML or not
     }
 
     @FXML
-    void initialize() throws ParseException {
-        setSkyboxPane();
-    }
-
-
-    @FXML
-    protected void setSkyboxPane() throws ParseException {
+    protected void setSkyboxPane(AnchorPane skyboxPane) throws ParseException {
         Group skybox = new Group();
         SkyBoxApplication.constructWorld(skybox); // Construct the empty SkyBox group
 
@@ -40,18 +37,13 @@ public class SkyBoxController {
         //Could we move it into constructWorld?
         //How to convert the things happening from a Scene to A AnchorPane or how to add a new scene into the Pane?
 
-        /*
-        skybox.setFill(new ImagePattern(SkyBoxApplication.skyboxImage));
-        camera = new PerspectiveCamera(true);
-        camera.setNearClip(0.1);
-        camera.setFarClip(30000.0);
 
-         */
-
-
+    //    skybox.setFill(new ImagePattern(SkyBoxApplication.skyboxImage));
+    //    camera = new PerspectiveCamera(true);
+    //    camera.setNearClip(0.1);
+    //    camera.setFarClip(30000.0);
 
 
     }
-
 
 }

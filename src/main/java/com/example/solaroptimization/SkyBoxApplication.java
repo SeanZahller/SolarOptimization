@@ -101,8 +101,8 @@ public class SkyBoxApplication extends Application {
         System.out.println(secondPane.toString());//Testing: shows AnchorPane id skyBoxPane
 
         AnchorPane skyboxPane = (AnchorPane) secondPane.get(1);
-        SkyBoxController controller = new SkyBoxController(skyboxPane);
-        controller.initialize();
+        SkyBoxController controller = new SkyBoxController();
+        controller.setSkyboxPane(skyboxPane);
 
         /* Uncomment this section to see the difference that happens
 

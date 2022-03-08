@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="542.0" prefWidth="603.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane fx:controller="com.example.solaroptimization.SkyBoxController" prefHeight="542.0" prefWidth="603.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
    <top>
       <SplitPane dividerPositions="0.47435897435897434" orientation="VERTICAL" prefHeight="80.0" prefWidth="600.0" BorderPane.alignment="CENTER">
          <items>
