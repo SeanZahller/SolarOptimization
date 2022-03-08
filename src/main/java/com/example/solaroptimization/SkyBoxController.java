@@ -18,7 +18,7 @@ public class SkyBoxController {
     }
 
     @FXML
-    private void initialize() throws ParseException {
+    void initialize() throws ParseException {
         setSkyboxPane();
     }
 

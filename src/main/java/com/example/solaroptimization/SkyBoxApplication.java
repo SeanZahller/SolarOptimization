@@ -102,7 +102,7 @@ public class SkyBoxApplication extends Application {
 
         AnchorPane skyboxPane = (AnchorPane) secondPane.get(1);
         SkyBoxController controller = new SkyBoxController(skyboxPane);
-        controller.setSkyboxPane();
+        controller.initialize();
 
         /* Uncomment this section to see the difference that happens
 
