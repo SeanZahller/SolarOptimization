@@ -4,107 +4,94 @@
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Slider?>
-<?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.effect.ImageInput?>
+<?import javafx.scene.image.Image?>
 <?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane fx:controller="com.example.solaroptimization.SkyBoxController" prefHeight="542.0" prefWidth="603.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
-   <top>
-      <SplitPane dividerPositions="0.47435897435897434" orientation="VERTICAL" prefHeight="80.0" prefWidth="600.0" BorderPane.alignment="CENTER">
-         <items>
-            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
-               <children>
-                  <Label alignment="CENTER" contentDisplay="CENTER" layoutX="132.0" layoutY="6.0" prefHeight="17.0" prefWidth="335.0" text="Solar Optimization Simulatior">
-                     <font>
-                        <Font name="Georgia" size="22.0" />
-                     </font>
-                  </Label>
-               </children>
-            </AnchorPane>
-            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="598.0">
-               <children>
-                  <DatePicker id="date" fx:id="date" layoutX="9.0" layoutY="6.0" prefHeight="25.0" prefWidth="166.0" promptText="Choose Date" />
-                  <Slider fx:id="slider" layoutX="184.0" layoutY="4.0" majorTickUnit="1.0" max="12.0" minorTickCount="0" prefHeight="2.0" prefWidth="406.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="1.0" />
-               </children>
-            </AnchorPane>
-         </items>
-      </SplitPane>
-   </top>
-   <center>
-      <SplitPane dividerPositions="0.29797979797979796" prefHeight="458.0" prefWidth="600.0" BorderPane.alignment="CENTER">
-         <items>
-            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="213.0">
-               <children>
-                  <TextField alignment="CENTER" layoutX="13.0" layoutY="23.0" text="0*0'0''" />
-                  <Label alignment="CENTER" contentDisplay="CENTER" layoutX="13.0" layoutY="6.0" prefHeight="17.0" prefWidth="149.0" text="Location:" />
-                  <Label alignment="CENTER" layoutX="13.0" layoutY="59.0" prefHeight="17.0" prefWidth="149.0" text="Solar Panels" />
-                  <Button fx:id="addAll" layoutX="14.0" layoutY="80.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="64.0" text="Add All">
-                     <font>
-                        <Font size="10.0" />
-                     </font>
-                  </Button>
-                  <Button fx:id="returnOnInvestment" layoutX="8.0" layoutY="265.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="159.0" text="Calculate Return On Investment">
-                     <font>
-                        <Font size="10.0" />
-                     </font>
-                  </Button>
-                  <Button fx:id="optimalPanels" layoutX="8.0" layoutY="299.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="159.0" text="Optimal Solar Panels">
-                     <font>
-                        <Font size="10.0" />
-                     </font>
-                  </Button>
-                  <Label alignment="TOP_CENTER" layoutX="6.0" layoutY="136.0" prefHeight="17.0" prefWidth="166.0" text="Controls:" />
-                  <Label alignment="BASELINE_LEFT" layoutX="6.0" layoutY="160.0" prefHeight="17.0" prefWidth="166.0" text="Rotate Camera: Click and Drag">
-                     <font>
-                        <Font size="10.0" />
-                     </font>
-                  </Label>
-                  <Label alignment="BASELINE_LEFT" layoutX="6.0" layoutY="211.0" prefHeight="17.0" prefWidth="166.0" text="Zoom: In = , Out = .">
-                     <font>
-                        <Font size="10.0" />
-                     </font>
-                  </Label>
-                  <Label alignment="BASELINE_LEFT" layoutX="6.0" layoutY="177.0" prefHeight="17.0" prefWidth="166.0" text="Move Camera: Left = a Right = d">
-                     <font>
-                        <Font size="10.0" />
-                     </font>
-                  </Label>
-                  <Label alignment="BASELINE_LEFT" layoutX="6.0" layoutY="194.0" prefHeight="17.0" prefWidth="166.0" text="Move Camera: Down = s Up = w">
-                     <font>
-                        <Font size="10.0" />
-                     </font>
-                  </Label>
-                  <Button fx:id="quit" layoutX="8.0" layoutY="417.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="159.0" text="QUIT">
-                     <font>
-                        <Font size="10.0" />
-                     </font>
-                  </Button>
-                  <Button fx:id="removeAll" layoutX="97.0" layoutY="80.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="64.0" text="Remove All">
-                     <font>
-                        <Font size="9.0" />
-                     </font>
-                  </Button>
-                  <Label alignment="BASELINE_LEFT" layoutX="6.0" layoutY="228.0" prefHeight="17.0" prefWidth="166.0" text="Rotate Models: Right = m Left = n">
-                     <font>
-                        <Font size="10.0" />
-                     </font>
-                  </Label>
-                  <Button fx:id="intensityLevels" layoutX="8.0" layoutY="333.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="159.0" text="Light Intensity Levels">
-                     <font>
-                        <Font size="10.0" />
-                     </font>
-                  </Button>
-                  <Button fx:id="sunriseSunsetTimes" layoutX="8.0" layoutY="367.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="159.0" text="Sunrise/Sunset Times">
-                     <font>
-                        <Font size="10.0" />
-                     </font>
-                  </Button>
-               </children>
-            </AnchorPane>
-            <AnchorPane fx:id="skyboxPane" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="417.0" />
-         </items>
-      </SplitPane>
-   </center>
-</BorderPane>
+<Pane fx:id="entireFrame" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="768.0" prefWidth="1024.0" style="-fx-border-color: black;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.solaroptimization.SkyBoxController">
+   <children>
+      <AnchorPane fx:id="sliderAndDate" layoutY="39.0" minHeight="0.0" minWidth="0.0" prefHeight="51.0" prefWidth="1024.0" style="-fx-background-color: linear-gradient(to right, indigo 20%, red 70%, indigo 100%); -fx-border-color: black;">
+         <children>
+            <DatePicker fx:id="datePicker" layoutX="14.0" layoutY="13.0" onAction="#getDate" prefHeight="25.0" prefWidth="166.0" promptText="Choose Date" />
+            <Slider fx:id="slider" layoutX="193.0" layoutY="7.0" majorTickUnit="1.0" max="12.0" minorTickCount="1" prefHeight="38.0" prefWidth="811.0" showTickMarks="true" snapToTicks="true" value="1.0" />
+         </children>
+      </AnchorPane>
+      <AnchorPane fx:id="uiPane" layoutY="89.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="0.0" minWidth="0.0" prefHeight="678.0" prefWidth="177.0" style="-fx-border-color: black;">
+         <children>
+            <Label fx:id="locationLabel" alignment="CENTER" layoutX="13.0" layoutY="14.0" prefHeight="17.0" prefWidth="149.0" text="Location:">
+               <font>
+                  <Font name="Georgia Italic" size="15.0" />
+               </font>
+            </Label>
+            <TextField fx:id="theLocationPicker" alignment="CENTER" layoutX="13.0" layoutY="39.0" onAction="#getLocation" promptText="Enter Coordinates" />
+            <Label fx:id="solarLabel" alignment="CENTER" layoutX="14.0" layoutY="148.0" prefHeight="17.0" prefWidth="149.0" text="Solar Panels:">
+               <font>
+                  <Font name="Georgia Italic" size="15.0" />
+               </font></Label>
+            <Button fx:id="returnOnInvestment" layoutX="9.0" layoutY="524.0" mnemonicParsing="false" onAction="#showROI" prefHeight="38.0" prefWidth="159.0" text="Calculate Return On Investment">
+               <font>
+                  <Font size="10.0" />
+               </font>
+            </Button>
+            <Button fx:id="optimalPanels" layoutX="9.0" layoutY="402.0" mnemonicParsing="false" onAction="#highlightOptimalPanels" prefHeight="38.0" prefWidth="159.0" text="Optimal Solar Panels">
+               <font>
+                  <Font size="13.0" />
+               </font>
+            </Button>
+            <Button fx:id="quit" layoutX="9.0" layoutY="598.0" mnemonicParsing="false" onAction="#exitProgram" prefHeight="38.0" prefWidth="159.0" style="-fx-background-color: red;" text="QUIT" textFill="WHITE">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Button>
+            <Button fx:id="removeAll" layoutX="94.0" layoutY="181.0" mnemonicParsing="false" onAction="#removeAllPanels" prefHeight="51.0" prefWidth="75.0" style="-fx-background-color: red;" text="Remove All" textFill="WHITE">
+               <font>
+                  <Font name="System Bold" size="11.0" />
+               </font>
+            </Button>
+            <Button fx:id="intensityLevels" layoutX="9.0" layoutY="464.0" mnemonicParsing="false" onAction="#showIntensityLevels" prefHeight="38.0" prefWidth="159.0" text="Light Intensity Levels">
+               <font>
+                  <Font size="13.0" />
+               </font>
+            </Button>
+            <Button fx:id="sunriseSunsetTimes" layoutX="9.0" layoutY="340.0" mnemonicParsing="false" onAction="#showSunTimes" prefHeight="38.0" prefWidth="159.0" text="Sunrise/Sunset Times">
+               <font>
+                  <Font size="13.0" />
+               </font>
+            </Button>
+            <Button fx:id="controls" layoutX="9.0" layoutY="279.0" mnemonicParsing="false" onAction="#showControls" prefHeight="38.0" prefWidth="159.0" text="Program Controls">
+               <font>
+                  <Font size="13.0" />
+               </font>
+            </Button>
+            <Button fx:id="addAll" layoutX="9.0" layoutY="181.0" mnemonicParsing="false" onAction="#addAllPanels" prefHeight="51.0" prefWidth="75.0" style="-fx-background-color: green;" text="Add All" textAlignment="CENTER" textFill="WHITE">
+               <font>
+                  <Font name="System Bold" size="11.0" />
+               </font>
+            </Button>
+            <Label fx:id="timezoneLabel" alignment="CENTER" layoutX="14.0" layoutY="79.0" prefHeight="17.0" prefWidth="149.0" text="TimeZone:">
+               <font>
+                  <Font name="Georgia Italic" size="15.0" />
+               </font>
+            </Label>
+            <TextField fx:id="timezone" alignment="CENTER" layoutX="14.0" layoutY="104.0" onAction="#getTimeZone" promptText="Enter TimeZone" />
+         </children>
+      </AnchorPane>
+      <Pane fx:id="skyboxPane" accessibleRole="IMAGE_VIEW" blendMode="SRC_ATOP" focusTraversable="true" layoutX="177.0" layoutY="89.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="678.0" prefWidth="847.0">
+         <effect>
+            <ImageInput>
+               <source>
+                  <Image url="@skyboxDesert.png" />
+               </source>
+            </ImageInput>
+         </effect>
+      </Pane>
+      <Label fx:id="title" alignment="CENTER" contentDisplay="CENTER" layoutX="353.0" layoutY="8.0" prefHeight="17.0" prefWidth="335.0" text="Solar Optimization Simulator">
+         <font>
+            <Font name="Georgia" size="22.0" />
+         </font>
+      </Label>
+   </children>
+</Pane>

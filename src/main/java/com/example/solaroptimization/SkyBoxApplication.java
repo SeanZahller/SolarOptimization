@@ -1,37 +1,33 @@
 package com.example.solaroptimization;
 
 import javafx.application.Application;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
+import javafx.print.*;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.control.SplitPane;
 import javafx.scene.layout.*;
-import javafx.scene.paint.ImagePattern;
 import javafx.stage.Stage;
 import com.interactivemesh.jfx.importer.tds.TdsModelImporter;
 import com.luckycatlabs.sunrisesunset.*;
 import com.luckycatlabs.sunrisesunset.dto.Location;
 import javafx.geometry.Bounds;
-import javafx.geometry.Point3D;
 import javafx.scene.*;
 import javafx.scene.image.Image;
-import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.*;
 import javafx.scene.transform.Rotate;
-import javafx.scene.transform.Transform;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 
 
@@ -56,53 +52,51 @@ public class SkyBoxApplication extends Application {
     private static final File groundSolarPanel = new File("C:\\GroundSolarPanel.3ds");
     private static Group solarPanelImport;
     private static Group gPanelOne;
-    private static Group gPanelOneBox;
+    static Group gPanelOneBox;
     private static Group gPanelTwo;
-    private static Group gPanelTwoBox;
+    static Group gPanelTwoBox;
     private static Group houseImport;
+    static Group solarPanelOnewR;
+    static Group solarPanelTwowR;
+    static Group solarPanelThreewR;
+    static Group solarPanelFourwR;
+    static Group panelsWHouse;
     private Boolean oneSelected = false;
     private Boolean twoSelected = false;
     private static PhongMaterial clear = new PhongMaterial(Color.TRANSPARENT);
     private PhongMaterial white = new PhongMaterial(Color.WHITE);
 
     //Location and Dates
-    private static String sunriseTime;
-    private static String sunsetTime;
-    private static Calendar cal;
-    private static String theDate = "20200419";
-    private static String timeZone = "GMT-8";
-    private static Location location;
-    private static Double latitude = 47.6588;
-    private static Double longitude = 117.4260;
-    private static Date date;
+    static String sunriseTime;
+    static String sunsetTime;
+    static Calendar cal;
+    static String theDate = "20220310";
+    static String theLocation;
+    static String timeZone = "GMT-8";
+    static Location location;
+    static BigDecimal latitude = BigDecimal.valueOf(47.6588);
+    static BigDecimal longitude = BigDecimal.valueOf(117.4260);
+    static Date date;
 
+    private AnchorPane sliderAndDate;
+    private AnchorPane uiPane;
+    private Label label;
 
     static Image skyboxImage;
-    {
-        try {
-            skyboxImage = new Image(new FileInputStream("C:\\skyboxDesert.png"));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
+    private Pane entireFrame;
+    private Pane skyboxPane;
 
-    public SkyBoxApplication() {
-    }
 
     @Override
     public void start(Stage stage) throws IOException, ParseException {
         FXMLLoader fxmlLoader = new FXMLLoader(SkyBoxApplication.class.getResource("skybox-viewUI.fxml"));
-        BorderPane root = fxmlLoader.load();
-        Scene scene = new Scene(root, 600, 600); // Make the whole scene with everything
+        Pane entireFrame = new Pane();
+        Group root = new Group(); //TODO: make thie borderpane the root, but load the fxmlL
+        Scene scene = new Scene(root, 1024, 768); // Make the whole scene with everything
+        entireFrame.getChildren().add(fxmlLoader.load());
 
-        SplitPane firstPane = (SplitPane) root.getChildren().get(1);//Going through hierarchy of fxml
-        ObservableList secondPane = (ObservableList) firstPane.getItems(); //List of items in second SplitPane
-
-        System.out.println(secondPane.toString());//Testing: shows AnchorPane id skyBoxPane
-
-        AnchorPane skyboxPane = (AnchorPane) secondPane.get(1);
-        SkyBoxController controller = new SkyBoxController();
-        controller.setSkyboxPane(skyboxPane);
+        root.getChildren().addAll(entireFrame);
+        scene.setRoot(root);
 
         /* Uncomment this section to see the difference that happens
 
@@ -271,6 +265,19 @@ public class SkyBoxApplication extends Application {
 
 
  */
+//        Node printPane = (Node) controller.setSkyboxPane();
+//        Printer printer = Printer.getDefaultPrinter();
+//        PageLayout pageLayout = printer.createPageLayout(Paper.A4,
+//                PageOrientation.PORTRAIT, Printer.MarginType.HARDWARE_MINIMUM);
+//        PrinterJob job = PrinterJob.createPrinterJob();
+//
+//        if (job != null && job.showPrintDialog(printPane.getScene().getWindow())) {
+//            boolean success = job.printPage(pageLayout, printPane);
+//            if (success) {
+//                job.endJob();
+//            }
+//        }
+
         stage.setTitle("Hello!");
         stage.setScene(scene);
         stage.show();
@@ -459,13 +466,11 @@ public class SkyBoxApplication extends Application {
         cal = Calendar.getInstance(); //Calendar object created
         cal.setTime(date); //Calender object given corresponding date
 
-        location = new Location(latitude, longitude); // Will be entered in coordinates
+        location = new Location(latitude.doubleValue(), longitude.doubleValue()); // Will be entered in coordinates
         SunriseSunsetCalculator calculator = new SunriseSunsetCalculator(location, timeZone); // Creates calculator for sun times
 
         sunriseTime = calculator.getOfficialSunriseForDate(cal); // Gets sunrise based on date and calculator created
         sunsetTime = calculator.getOfficialSunsetForDate(cal); // Gets sunset based on date and calculator created
-        System.out.println(sunriseTime); //Testing :)
-        System.out.println(sunsetTime);
     }
 
     static Group models(){
@@ -502,14 +507,15 @@ public class SkyBoxApplication extends Application {
         Box boxers6 = createsolar(gPanelTwo, 39, 3.64, 130, -55, 0, -65);
 
         //Grouping together solar panel w/ respective box
-        Group solarPanelOnewR = new Group(solarPanelOne, boxers);
-        Group solarPanelTwowR = new Group(solarPanelTwo, boxers2);
-        Group solarPanelThreewR = new Group(solarPanelThree, boxers3);
-        Group solarPanelFourwR = new Group(solarPanelFour, boxers4);
+        solarPanelOnewR = new Group(solarPanelOne, boxers);
+        solarPanelTwowR = new Group(solarPanelTwo, boxers2);
+        solarPanelThreewR = new Group(solarPanelThree, boxers3);
+        solarPanelFourwR = new Group(solarPanelFour, boxers4);
         gPanelOneBox = new Group(gPanelOne, boxers5);
         gPanelTwoBox = new Group(gPanelTwo, boxers6);
 
-        Group panelsWHouse = new Group(solarPanelOnewR, solarPanelTwowR, solarPanelThreewR, solarPanelFourwR, gPanelOneBox, gPanelTwoBox, houseImport);
+        panelsWHouse = new Group(houseImport, solarPanelOnewR, solarPanelTwowR, solarPanelThreewR, solarPanelFourwR, gPanelOneBox, gPanelTwoBox);
+        panelsWHouse.setTranslateY(-200); // puts house at 0,0,0... If you uncomment this it shows models on screen
         return panelsWHouse;
     }
 
@@ -534,9 +540,6 @@ public class SkyBoxApplication extends Application {
         pointlight.setColor(Color.GREENYELLOW);
         return sun;
     }
-
-
-
 
     public static void main(String[] args) {
         launch(args);
