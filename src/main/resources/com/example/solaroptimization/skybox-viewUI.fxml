@@ -15,80 +15,90 @@
    <children>
       <AnchorPane fx:id="sliderAndDate" layoutY="39.0" minHeight="0.0" minWidth="0.0" prefHeight="51.0" prefWidth="1024.0" style="-fx-background-color: linear-gradient(to right, indigo 20%, red 70%, indigo 100%); -fx-border-color: black;">
          <children>
-            <DatePicker fx:id="datePicker" layoutX="14.0" layoutY="13.0" onAction="#getDate" prefHeight="25.0" prefWidth="166.0" promptText="Choose Date" />
-            <Slider fx:id="slider" layoutX="193.0" layoutY="7.0" majorTickUnit="1.0" max="12.0" minorTickCount="1" prefHeight="38.0" prefWidth="811.0" showTickMarks="true" snapToTicks="true" value="1.0" />
+            <DatePicker fx:id="datePicker" layoutX="14.0" layoutY="13.0" onAction="#getDate" prefHeight="25.0" prefWidth="166.0" promptText="03/10/2022" />
+            <Slider fx:id="slider" layoutX="193.0" layoutY="7.0" majorTickUnit="1.0" max="12.0" minorTickCount="1" onMouseReleased="#sunMovement" prefHeight="38.0" prefWidth="811.0" showTickMarks="true" snapToTicks="true" value="6.0" />
          </children>
       </AnchorPane>
       <AnchorPane fx:id="uiPane" layoutY="89.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="0.0" minWidth="0.0" prefHeight="678.0" prefWidth="177.0" style="-fx-border-color: black;">
          <children>
-            <Label fx:id="locationLabel" alignment="CENTER" layoutX="13.0" layoutY="14.0" prefHeight="17.0" prefWidth="149.0" text="Location:">
+            <Label fx:id="locationLabel" alignment="CENTER" layoutX="13.0" layoutY="98.0" prefHeight="17.0" prefWidth="149.0" text="Location:">
                <font>
                   <Font name="Georgia Italic" size="15.0" />
                </font>
             </Label>
-            <TextField fx:id="theLocationPicker" alignment="CENTER" layoutX="13.0" layoutY="39.0" onAction="#getLocation" promptText="Enter Coordinates" />
-            <Label fx:id="solarLabel" alignment="CENTER" layoutX="14.0" layoutY="148.0" prefHeight="17.0" prefWidth="149.0" text="Solar Panels:">
+            <TextField fx:id="theLocationPicker" alignment="CENTER" layoutX="13.0" layoutY="123.0" onAction="#getLocation" promptText="47.6588, -117.4260" />
+            <Label fx:id="solarLabel" alignment="CENTER" layoutX="14.0" layoutY="232.0" prefHeight="17.0" prefWidth="149.0" text="Solar Panels:">
                <font>
                   <Font name="Georgia Italic" size="15.0" />
                </font></Label>
-            <Button fx:id="returnOnInvestment" layoutX="9.0" layoutY="524.0" mnemonicParsing="false" onAction="#showROI" prefHeight="38.0" prefWidth="159.0" text="Calculate Return On Investment">
+            <Button fx:id="paybackPeriod" layoutX="9.0" layoutY="557.0" mnemonicParsing="false" onAction="#showPP" prefHeight="38.0" prefWidth="159.0" text="Calculate Payback Period">
                <font>
                   <Font size="10.0" />
                </font>
             </Button>
-            <Button fx:id="optimalPanels" layoutX="9.0" layoutY="402.0" mnemonicParsing="false" onAction="#highlightOptimalPanels" prefHeight="38.0" prefWidth="159.0" text="Optimal Solar Panels">
+            <Button fx:id="optimalPanels" layoutX="9.0" layoutY="456.0" mnemonicParsing="false" onAction="#highlightOptimalPanels" prefHeight="38.0" prefWidth="159.0" text="Optimal Solar Panels">
                <font>
                   <Font size="13.0" />
                </font>
             </Button>
-            <Button fx:id="quit" layoutX="9.0" layoutY="598.0" mnemonicParsing="false" onAction="#exitProgram" prefHeight="38.0" prefWidth="159.0" style="-fx-background-color: red;" text="QUIT" textFill="WHITE">
-               <font>
-                  <Font name="System Bold" size="14.0" />
-               </font>
-            </Button>
-            <Button fx:id="removeAll" layoutX="94.0" layoutY="181.0" mnemonicParsing="false" onAction="#removeAllPanels" prefHeight="51.0" prefWidth="75.0" style="-fx-background-color: red;" text="Remove All" textFill="WHITE">
+            <Button fx:id="removeAll" layoutX="94.0" layoutY="265.0" mnemonicParsing="false" onAction="#removeAllPanels" prefHeight="51.0" prefWidth="75.0" style="-fx-background-color: red;" text="Remove All" textFill="WHITE">
                <font>
                   <Font name="System Bold" size="11.0" />
                </font>
             </Button>
-            <Button fx:id="intensityLevels" layoutX="9.0" layoutY="464.0" mnemonicParsing="false" onAction="#showIntensityLevels" prefHeight="38.0" prefWidth="159.0" text="Light Intensity Levels">
+            <Button fx:id="intensityLevels" layoutX="15.0" layoutY="511.0" mnemonicParsing="false" onAction="#showIntensityLevels" prefHeight="38.0" prefWidth="159.0" text="Light Intensity Levels">
                <font>
                   <Font size="13.0" />
                </font>
             </Button>
-            <Button fx:id="sunriseSunsetTimes" layoutX="9.0" layoutY="340.0" mnemonicParsing="false" onAction="#showSunTimes" prefHeight="38.0" prefWidth="159.0" text="Sunrise/Sunset Times">
+            <Button fx:id="sunriseSunsetTimes" layoutX="9.0" layoutY="404.0" mnemonicParsing="false" onAction="#showSunTimes" prefHeight="38.0" prefWidth="159.0" text="Sunrise/Sunset Times">
                <font>
                   <Font size="13.0" />
                </font>
             </Button>
-            <Button fx:id="controls" layoutX="9.0" layoutY="279.0" mnemonicParsing="false" onAction="#showControls" prefHeight="38.0" prefWidth="159.0" text="Program Controls">
+            <Button fx:id="controls" layoutX="9.0" layoutY="354.0" mnemonicParsing="false" onAction="#showControls" prefHeight="38.0" prefWidth="159.0" text="Program Controls">
                <font>
                   <Font size="13.0" />
                </font>
             </Button>
-            <Button fx:id="addAll" layoutX="9.0" layoutY="181.0" mnemonicParsing="false" onAction="#addAllPanels" prefHeight="51.0" prefWidth="75.0" style="-fx-background-color: green;" text="Add All" textAlignment="CENTER" textFill="WHITE">
+            <Button fx:id="addAll" layoutX="9.0" layoutY="265.0" mnemonicParsing="false" onAction="#addAllPanels" prefHeight="51.0" prefWidth="75.0" style="-fx-background-color: green;" text="Add All" textAlignment="CENTER" textFill="WHITE">
                <font>
                   <Font name="System Bold" size="11.0" />
                </font>
             </Button>
-            <Label fx:id="timezoneLabel" alignment="CENTER" layoutX="14.0" layoutY="79.0" prefHeight="17.0" prefWidth="149.0" text="TimeZone:">
+            <Label fx:id="timezoneLabel" alignment="CENTER" layoutX="14.0" layoutY="163.0" prefHeight="17.0" prefWidth="149.0" text="Timezone">
                <font>
                   <Font name="Georgia Italic" size="15.0" />
                </font>
             </Label>
-            <TextField fx:id="timezone" alignment="CENTER" layoutX="14.0" layoutY="104.0" onAction="#getTimeZone" promptText="Enter TimeZone" />
+            <TextField fx:id="timezone" alignment="CENTER" layoutX="14.0" layoutY="188.0" onAction="#getTimeZone" promptText="GMT-8" />
+            <Button fx:id="quit" layoutX="8.0" layoutY="613.0" mnemonicParsing="false" onAction="#exitProgram" prefHeight="38.0" prefWidth="159.0" style="-fx-background-color: red;" text="QUIT" textFill="WHITE">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Button>
+            <Label alignment="CENTER" layoutX="14.0" layoutY="14.0" prefHeight="17.0" prefWidth="149.0" text="Current Time:">
+               <font>
+                  <Font name="Georgia Italic" size="15.0" />
+               </font>
+            </Label>
+            <Label fx:id="currentTimeLabel" alignment="CENTER" layoutX="13.0" layoutY="41.0" prefHeight="17.0" prefWidth="149.0">
+               <font>
+                  <Font name="Georgia" size="18.0" />
+               </font>
+            </Label>
          </children>
       </AnchorPane>
       <Pane fx:id="skyboxPane" accessibleRole="IMAGE_VIEW" blendMode="SRC_ATOP" focusTraversable="true" layoutX="177.0" layoutY="89.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="678.0" prefWidth="847.0">
          <effect>
             <ImageInput>
                <source>
-                  <Image url="@skyboxDesert.png" />
+                  <Image url="file:/C:/Users/Mark%20Capka/Downloads/SeniorCapstone-GroupB-UIConnected/SeniorCapstone-GroupB-UIConnected/SkyBoxJavaFX-Tester/src/main/resources/skyboxExample.png" backgroundLoading="true"/>
                </source>
             </ImageInput>
          </effect>
       </Pane>
-      <Label fx:id="title" alignment="CENTER" contentDisplay="CENTER" layoutX="353.0" layoutY="8.0" prefHeight="17.0" prefWidth="335.0" text="Solar Optimization Simulator">
+      <Label fx:id="titleLabel" alignment="CENTER" contentDisplay="CENTER" layoutX="353.0" layoutY="8.0" prefHeight="17.0" prefWidth="335.0" text="Solar Optimization Simulator">
          <font>
             <Font name="Georgia" size="22.0" />
          </font>

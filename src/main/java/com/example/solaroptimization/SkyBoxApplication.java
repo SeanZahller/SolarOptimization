@@ -2,11 +2,11 @@ package com.example.solaroptimization;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
-import javafx.print.*;
+import javafx.geometry.Point3D;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.control.SplitPane;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
+import javafx.scene.transform.Transform;
 import javafx.stage.Stage;
 import com.interactivemesh.jfx.importer.tds.TdsModelImporter;
 import com.luckycatlabs.sunrisesunset.*;
@@ -20,10 +20,7 @@ import javafx.scene.shape.*;
 import javafx.scene.transform.Rotate;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -52,19 +49,19 @@ public class SkyBoxApplication extends Application {
     private static final File groundSolarPanel = new File("C:\\GroundSolarPanel.3ds");
     private static Group solarPanelImport;
     private static Group gPanelOne;
-    static Group gPanelOneBox;
     private static Group gPanelTwo;
-    static Group gPanelTwoBox;
     private static Group houseImport;
     static Group solarPanelOnewR;
     static Group solarPanelTwowR;
     static Group solarPanelThreewR;
     static Group solarPanelFourwR;
+    static Group gPanelOneBox;
+    static Group gPanelTwoBox;
     static Group panelsWHouse;
+    static Group sun;
     private Boolean oneSelected = false;
     private Boolean twoSelected = false;
-    private static PhongMaterial clear = new PhongMaterial(Color.TRANSPARENT);
-    private PhongMaterial white = new PhongMaterial(Color.WHITE);
+    static PhongMaterial clear = new PhongMaterial(Color.TRANSPARENT);
 
     //Location and Dates
     static String sunriseTime;
@@ -74,17 +71,19 @@ public class SkyBoxApplication extends Application {
     static String theLocation;
     static String timeZone = "GMT-8";
     static Location location;
-    static BigDecimal latitude = BigDecimal.valueOf(47.6588);
-    static BigDecimal longitude = BigDecimal.valueOf(117.4260);
+    static Double latitude = 47.6588;
+    static Double longitude = -117.4260;
     static Date date;
 
-    private AnchorPane sliderAndDate;
-    private AnchorPane uiPane;
-    private Label label;
-
-    static Image skyboxImage;
-    private Pane entireFrame;
-    private Pane skyboxPane;
+    //Sun movement variables
+    static boolean box1closest;
+    static boolean box2closest;
+    static boolean box3closest;
+    static boolean box4closest;
+    static boolean gbox1closest;
+    static boolean gbox2closest;
+    static PhongMaterial optimal = new PhongMaterial(Color.GREEN);
+    static PhongMaterial subOptimal = new PhongMaterial(Color.RED);
 
 
     @Override
@@ -98,10 +97,8 @@ public class SkyBoxApplication extends Application {
         root.getChildren().addAll(entireFrame);
         scene.setRoot(root);
 
-        /* Uncomment this section to see the difference that happens
 
         // This needs to set up the inside of the skyboxPane?
-        scene.setFill(new ImagePattern(skyboxImage)); //THIS causes whole UI to get filled over
         camera = new PerspectiveCamera(true);
         camera.setNearClip(0.1);
         camera.setFarClip(30000.0);
@@ -123,16 +120,10 @@ public class SkyBoxApplication extends Application {
         cameraDolly.getChildren().add(turn);
         turn.getChildren().add(camera);
 
-         */
-
-
         //-------------END of Scene and Camera set up----------------------------//
 
-
-
-
         //----------------Controls Section----------------------------//
-/*
+
         // Use keyboard to control camera position
         //scene.getRoot().setOnKeyPressed(event -> { ???????????????????????????? scene.getRoot() put controls in the anchorPane?
         scene.setOnKeyPressed(event -> {
@@ -263,28 +254,12 @@ public class SkyBoxApplication extends Application {
             xRotate.setAngle(((xRotate.getAngle() + mouseDeltaY * 0.2) % 360 + 540) % 360 - 180); // -
         });
 
-
- */
-//        Node printPane = (Node) controller.setSkyboxPane();
-//        Printer printer = Printer.getDefaultPrinter();
-//        PageLayout pageLayout = printer.createPageLayout(Paper.A4,
-//                PageOrientation.PORTRAIT, Printer.MarginType.HARDWARE_MINIMUM);
-//        PrinterJob job = PrinterJob.createPrinterJob();
-//
-//        if (job != null && job.showPrintDialog(printPane.getScene().getWindow())) {
-//            boolean success = job.printPage(pageLayout, printPane);
-//            if (success) {
-//                job.endJob();
-//            }
-//        }
-
-        stage.setTitle("Hello!");
+        stage.setTitle("Solar Optimization Simulator!");
         stage.setScene(scene);
         stage.show();
     }
 
     static void constructWorld(Group root) {
-        // AmbientLight light = new AmbientLight();
         AmbientLight light = new AmbientLight(Color.rgb(160, 160, 160));
 
         PointLight pl = new PointLight();
@@ -335,20 +310,20 @@ public class SkyBoxApplication extends Application {
         float h = 100;                    // Height
         float s = 200;                    // Base hypotenuse
         pyramidMesh.getPoints().addAll(
-                0,    0,    0,            // Point 0 - Top
-                0,    h,    -s/2,         // Point 1 - Front
-                -s/2, h,    0,            // Point 2 - Left
-                s/2,  h,    0,            // Point 3 - Right
-                0,    h,    s/2           // Point 4 - Back
+                0, 0, 0,            // Point 0 - Top
+                0, h, -s / 2,         // Point 1 - Front
+                -s / 2, h, 0,            // Point 2 - Left
+                s / 2, h, 0,            // Point 3 - Right
+                0, h, s / 2           // Point 4 - Back
         );
         // define faces
         pyramidMesh.getFaces().addAll(
-                0,0,  2,1,  1,2,          // Front left face
-                0,0,  1,1,  3,1,          // Front right face
-                0,0,  3,1,  4,2,          // Back right face
-                0,0,  4,1,  2,2,          // Back left face
-                4,1,  1,4,  2,2,          // Bottom left face
-                4,1,  3,3,  1,4           // Bottom right face
+                0, 0, 2, 1, 1, 2,          // Front left face
+                0, 0, 1, 1, 3, 1,          // Front right face
+                0, 0, 3, 1, 4, 2,          // Back right face
+                0, 0, 4, 1, 2, 2,          // Back left face
+                4, 1, 1, 4, 2, 2,          // Bottom left face
+                4, 1, 3, 3, 1, 4           // Bottom right face
         );
         pyramidMesh.getFaceSmoothingGroups().addAll(
                 1, 2, 3, 4, 5, 5);
@@ -376,9 +351,10 @@ public class SkyBoxApplication extends Application {
 
         root.getChildren().add(light);
 
-        Image back = new Image(String.valueOf(SkyBoxApplication.class.getResource("skyboxDesert.png")));
+        //Image back = new Image(String.valueOf(SkyBoxApplication.class.getResource("skyboxDesert.png")));
+        Image back2 = new Image("file:skyboxDesert.png");
         final PhongMaterial skyMaterial = new PhongMaterial();
-        skyMaterial.setDiffuseMap(back);
+        skyMaterial.setDiffuseMap(back2);
         Box skybox = new Box(10000, 10000, 10000);
         skybox.setMaterial(skyMaterial);
         skybox.setCullFace(CullFace.NONE);
@@ -386,8 +362,7 @@ public class SkyBoxApplication extends Application {
 
     }
 
-    private static Group setHouse()
-    {
+    private static Group setHouse() {
         TdsModelImporter modelImporter = new TdsModelImporter(); //Model Importer
 
         modelImporter.read(house); //Read in the house model
@@ -425,7 +400,7 @@ public class SkyBoxApplication extends Application {
         return solarPanelImport;
     }
 
-    private static Box createsolar(Group group1, double height, double depth, double width, double rax, double raz, double ray){
+    private static Box createsolar(Group group1, double height, double depth, double width, double rax, double raz, double ray) {
         Box box = new Box();
         Bounds cord = group1.getBoundsInLocal();
         box.getTransforms().setAll(new Rotate(ray, Rotate.Y_AXIS), new Rotate(rax, Rotate.X_AXIS), new Rotate(raz, Rotate.Z_AXIS));
@@ -439,23 +414,23 @@ public class SkyBoxApplication extends Application {
         return box;
     }
 
-    private void setCenters(Rotate r, Group beingRotated){
+    private void setCenters(Rotate r, Group beingRotated) {
         r.setPivotX(beingRotated.getBoundsInLocal().getCenterX());
         r.setPivotY(beingRotated.getBoundsInLocal().getCenterY());
         r.setPivotZ(beingRotated.getBoundsInLocal().getCenterZ());
     }
 
-    private void gPanelOneSelected(){
+    private void gPanelOneSelected() {
         oneSelected = true;
         twoSelected = false;
     }
 
-    private void gPanelTwoSelected(){
+    private void gPanelTwoSelected() {
         oneSelected = false;
         twoSelected = true;
     }
 
-    private void clearSelected(){
+    private void clearSelected() {
         oneSelected = false;
         twoSelected = false;
     }
@@ -473,7 +448,7 @@ public class SkyBoxApplication extends Application {
         sunsetTime = calculator.getOfficialSunsetForDate(cal); // Gets sunset based on date and calculator created
     }
 
-    static Group models(){
+    static Group models() {
 
         int rightSideAngles[] = {-68, -68, 0};
 
@@ -515,30 +490,476 @@ public class SkyBoxApplication extends Application {
         gPanelTwoBox = new Group(gPanelTwo, boxers6);
 
         panelsWHouse = new Group(houseImport, solarPanelOnewR, solarPanelTwowR, solarPanelThreewR, solarPanelFourwR, gPanelOneBox, gPanelTwoBox);
-        panelsWHouse.setTranslateY(-200); // puts house at 0,0,0... If you uncomment this it shows models on screen
+        panelsWHouse.setTranslateY(-200); // puts house at 0,0,0... If you comment this it shows models on screen
         return panelsWHouse;
     }
 
-    static Group sunCreation(){
+    static void sunCreation() {
         Sphere sphere = new Sphere(80.0f);
         PhongMaterial material = new PhongMaterial();
-        material.setDiffuseColor(Color.YELLOWGREEN);
+        material.setDiffuseColor(Color.YELLOW);
         sphere.setMaterial(material);
 
         // create a point light
         PointLight pointlight = new PointLight();
 
         // create a Group
-        Group sun = new Group(sphere, pointlight);
-        // translate the sphere to a position
+        sun = new Group(sphere, pointlight);
 
         sphere.setTranslateX(100);
         sphere.setTranslateY(-200);
         pointlight.setTranslateZ(-1000);
         pointlight.setTranslateX(+1000);
         pointlight.setTranslateY(+10);
-        pointlight.setColor(Color.GREENYELLOW);
-        return sun;
+        pointlight.setColor(Color.YELLOW);
+
+    }
+
+    static void sunTrajectory(Double sliderValue) {
+        double x;
+        double y;
+        double angle;
+        double angleRadians;
+
+        if(sliderValue == 0)
+        {
+            //Suns start position
+            angle = 0;
+            angleRadians = Math.toRadians(angle);
+            x = Math.cos(angleRadians);
+            y = Math.sin(angleRadians);
+
+            sun.setTranslateX(x * 1000);
+            sun.setTranslateY(-y * 1000);
+            sun.setTranslateZ(0);
+        }
+        else if(sliderValue == 0.5)
+        {
+            angle = 7.5;
+            angleRadians = Math.toRadians(angle);
+            x = Math.cos(angleRadians);
+            y = Math.sin(angleRadians);
+
+            sun.setTranslateX(x * 1000);
+            sun.setTranslateY(-y * 1000);
+            sun.setTranslateZ(0);
+        }
+        else if(sliderValue == 1.0)
+        {
+            angle = 15;
+            angleRadians = Math.toRadians(angle);
+            x = Math.cos(angleRadians);
+            y = Math.sin(angleRadians);
+
+            sun.setTranslateX(x * 1000);
+            sun.setTranslateY(-y * 1000);
+            sun.setTranslateZ(0);
+        }
+        else if(sliderValue == 1.5)
+        {
+            angle = 22.5;
+            angleRadians = Math.toRadians(angle);
+            x = Math.cos(angleRadians);
+            y = Math.sin(angleRadians);
+
+            sun.setTranslateX(x * 1000);
+            sun.setTranslateY(-y * 1000);
+            sun.setTranslateZ(0);
+        }
+        else if(sliderValue == 2.0)
+        {
+            angle = 30;
+            angleRadians = Math.toRadians(angle);
+            x = Math.cos(angleRadians);
+            y = Math.sin(angleRadians);
+
+            sun.setTranslateX(x * 1000);
+            sun.setTranslateY(-y * 1000);
+            sun.setTranslateZ(0);
+        }
+        else if(sliderValue == 2.5) {
+            angle = 37.5;
+            angleRadians = Math.toRadians(angle);
+            x = Math.cos(angleRadians);
+            y = Math.sin(angleRadians);
+
+            sun.setTranslateX(x * 1000);
+            sun.setTranslateY(-y * 1000);
+            sun.setTranslateZ(0);
+        }
+        else if(sliderValue == 3.0)
+        {
+            angle = 45;
+            angleRadians = Math.toRadians(angle);
+            x = Math.cos(angleRadians);
+            y = Math.sin(angleRadians);
+
+            sun.setTranslateX(x * 1000);
+            sun.setTranslateY(-y * 1000);
+            sun.setTranslateZ(0);
+        }
+        else if(sliderValue == 3.5)
+        {
+            angle = 52.5;
+            angleRadians = Math.toRadians(angle);
+            x = Math.cos(angleRadians);
+            y = Math.sin(angleRadians);
+
+            sun.setTranslateX(x * 1000);
+            sun.setTranslateY(-y * 1000);
+            sun.setTranslateZ(0);
+        }
+        else if(sliderValue == 4.0)
+        {
+            angle = 60;
+            angleRadians = Math.toRadians(angle);
+            x = Math.cos(angleRadians);
+            y = Math.sin(angleRadians);
+
+            sun.setTranslateX(x * 1000);
+            sun.setTranslateY(-y * 1000);
+            sun.setTranslateZ(0);
+        }
+        else if(sliderValue == 4.5)
+        {
+            angle = 67.5;
+            angleRadians = Math.toRadians(angle);
+            x = Math.cos(angleRadians);
+            y = Math.sin(angleRadians);
+
+            sun.setTranslateX(x * 1000);
+            sun.setTranslateY(-y * 1000);
+            sun.setTranslateZ(0);
+        }
+        else if(sliderValue == 5.0)
+        {
+            angle = 75;
+            angleRadians = Math.toRadians(angle);
+            x = Math.cos(angleRadians);
+            y = Math.sin(angleRadians);
+
+            sun.setTranslateX(x * 1000);
+            sun.setTranslateY(-y * 1000);
+            sun.setTranslateZ(0);
+        }
+        else if(sliderValue == 5.5)
+        {
+            angle = 82.5;
+            angleRadians = Math.toRadians(angle);
+            x = Math.cos(angleRadians);
+            y = Math.sin(angleRadians);
+
+            sun.setTranslateX(x * 1000);
+            sun.setTranslateY(-y * 1000);
+            sun.setTranslateZ(0);
+        }
+        else if(sliderValue == 6.0)
+        {
+            angle = 90;
+            angleRadians = Math.toRadians(angle);
+            x = Math.cos(angleRadians);
+            y = Math.sin(angleRadians);
+
+            sun.setTranslateX(x * 1000);
+            sun.setTranslateY(-y * 1000);
+            sun.setTranslateZ(0);
+        }
+        else if(sliderValue == 6.5)
+        {
+            angle = 97.5;
+            angleRadians = Math.toRadians(angle);
+            x = Math.cos(angleRadians);
+            y = Math.sin(angleRadians);
+
+            sun.setTranslateX(x * 1000);
+            sun.setTranslateY(-y * 1000);
+            sun.setTranslateZ(0);
+        }
+        else if(sliderValue == 7.0)
+        {
+            angle = 105;
+            angleRadians = Math.toRadians(angle);
+            x = Math.cos(angleRadians);
+            y = Math.sin(angleRadians);
+
+            sun.setTranslateX(x * 1000);
+            sun.setTranslateY(-y * 1000);
+            sun.setTranslateZ(0);
+        }
+        else if(sliderValue == 7.5)
+        {
+            angle = 112.5;
+            angleRadians = Math.toRadians(angle);
+            x = Math.cos(angleRadians);
+            y = Math.sin(angleRadians);
+
+            sun.setTranslateX(x * 1000);
+            sun.setTranslateY(-y * 1000);
+            sun.setTranslateZ(0);
+        }
+        else if(sliderValue == 8.0)
+        {
+            angle = 120;
+            angleRadians = Math.toRadians(angle);
+            x = Math.cos(angleRadians);
+            y = Math.sin(angleRadians);
+
+            sun.setTranslateX(x * 1000);
+            sun.setTranslateY(-y * 1000);
+            sun.setTranslateZ(0);
+        }
+        else if(sliderValue == 8.5)
+        {
+            angle = 127.5;
+            angleRadians = Math.toRadians(angle);
+            x = Math.cos(angleRadians);
+            y = Math.sin(angleRadians);
+
+            sun.setTranslateX(x * 1000);
+            sun.setTranslateY(-y * 1000);
+            sun.setTranslateZ(0);
+        }
+        else if(sliderValue == 9.0)
+        {
+            angle = 135;
+            angleRadians = Math.toRadians(angle);
+            x = Math.cos(angleRadians);
+            y = Math.sin(angleRadians);
+
+            sun.setTranslateX(x * 1000);
+            sun.setTranslateY(-y * 1000);
+            sun.setTranslateZ(0);
+        }
+        else if(sliderValue == 9.5)
+        {
+            angle = 142.5;
+            angleRadians = Math.toRadians(angle);
+            x = Math.cos(angleRadians);
+            y = Math.sin(angleRadians);
+
+            sun.setTranslateX(x * 1000);
+            sun.setTranslateY(-y * 1000);
+            sun.setTranslateZ(0);
+        }
+        else if(sliderValue == 10.0)
+        {
+            angle = 150;
+            angleRadians = Math.toRadians(angle);
+            x = Math.cos(angleRadians);
+            y = Math.sin(angleRadians);
+
+            sun.setTranslateX(x * 1000);
+            sun.setTranslateY(-y * 1000);
+            sun.setTranslateZ(0);
+        }
+        else if(sliderValue == 10.5)
+        {
+            angle = 157.5;
+            angleRadians = Math.toRadians(angle);
+            x = Math.cos(angleRadians);
+            y = Math.sin(angleRadians);
+
+            sun.setTranslateX(x * 1000);
+            sun.setTranslateY(-y * 1000);
+            sun.setTranslateZ(0);
+        }
+        else if(sliderValue == 11.0)
+        {
+            angle = 165;
+            angleRadians = Math.toRadians(angle);
+            x = Math.cos(angleRadians);
+            y = Math.sin(angleRadians);
+
+            sun.setTranslateX(x * 1000);
+            sun.setTranslateY(-y * 1000);
+            sun.setTranslateZ(0);
+        }
+        else if(sliderValue == 11.5)
+        {
+            angle = 172.5;
+            angleRadians = Math.toRadians(angle);
+            x = Math.cos(angleRadians);
+            y = Math.sin(angleRadians);
+
+            sun.setTranslateX(x * 1000);
+            sun.setTranslateY(-y * 1000);
+            sun.setTranslateZ(0);
+        }
+        else if(sliderValue == 12.0)
+        {
+            angle = 178;
+            angleRadians = Math.toRadians(angle);
+            x = Math.cos(angleRadians);
+            y = Math.sin(angleRadians);
+
+            sun.setTranslateX(x * 1000);
+            sun.setTranslateY(-y * 1000);
+            sun.setTranslateZ(0);
+        }
+        else if(sliderValue == 12.5)
+        {
+            angle = 179;
+            angleRadians = Math.toRadians(angle);
+            x = Math.cos(angleRadians);
+            y = Math.sin(angleRadians);
+
+            sun.setTranslateX(x * 1000);
+            sun.setTranslateY(-y * 1000);
+            sun.setTranslateZ(0);
+        }
+        else if(sliderValue == 13)
+        {
+            angle = 180;
+            angleRadians = Math.toRadians(angle);
+            x = Math.cos(angleRadians);
+            y = Math.sin(angleRadians);
+
+            sun.setTranslateX(x * 1000);
+            sun.setTranslateY(-y * 1000);
+            sun.setTranslateZ(0);
+        }
+
+    }
+
+    //helper methods for most optimal
+    public static double distancecalc(Box box, Group sun) {
+        Point3D point1 = new Point3D(box.getTranslateX(), box.getTranslateY(), box.getTranslateZ());
+        Point3D point2 = new Point3D(sun.getTranslateX(), sun.getTranslateY(), sun.getTranslateZ());
+        Double distance = Math.sqrt(Math.pow(point1.getX() - point2.getX(), 2) + Math.pow(point1.getY() - point2.getY(), 2) + Math.pow(point1.getZ() - point2.getZ(), 2));
+        return distance;
+    }
+
+    public static void colorSetOpt() {
+        double total = 0.0;
+        double averageP1 = 0.0;
+        double averageP2 = 0.0;
+        double averageP3 = 0.0;
+        double averageP4 = 0.0;
+        double averageGP1 = 0.0;
+        double averageGP2 = 0.0;
+        double[] totalHours = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0};
+
+        for(int i = 0; i < totalHours.length; i++){
+            sunTrajectory(totalHours[i]);
+            total += calculateLightIntesity((Box) solarPanelOnewR.getChildren().get(1), sun);
+        }
+        averageP1 = total / 12;
+
+        total = 0;
+        for(int i = 0; i < totalHours.length; i++){
+            sunTrajectory(totalHours[i]);
+            total += calculateLightIntesity((Box) solarPanelTwowR.getChildren().get(1), sun);
+        }
+        averageP2 = total / 12;
+
+        total = 0;
+        for(int i = 0; i < totalHours.length; i++){
+            sunTrajectory(totalHours[i]);
+            total += calculateLightIntesity((Box) solarPanelThreewR.getChildren().get(1), sun);
+        }
+        averageP3 = total / 12;
+
+        total = 0;
+        for(int i = 0; i < totalHours.length; i++){
+            sunTrajectory(totalHours[i]);
+            total += calculateLightIntesity((Box) solarPanelFourwR.getChildren().get(1), sun);
+        }
+        averageP4 = total / 12;
+
+        total = 0;
+        for(int i = 0; i < totalHours.length; i++){
+            sunTrajectory(totalHours[i]);
+            total += calculateLightIntesity((Box) gPanelOneBox.getChildren().get(1), sun);
+        }
+        averageGP1 = total / 12;
+
+        total = 0;
+        for(int i = 0; i < totalHours.length; i++){
+            sunTrajectory(totalHours[i]);
+            total += calculateLightIntesity((Box) gPanelTwoBox.getChildren().get(1), sun);
+        }
+        averageGP2 = total / 12;
+
+        box1closest = false;
+        box2closest = false;
+        box3closest = false;
+        box4closest = false;
+        gbox1closest = false;
+        gbox2closest = false;
+
+        if (averageP1 > averageP2 && averageP1 > averageP3 && averageP1 > averageP4) {
+            box1closest = true;
+            box2closest = false;
+            box3closest = false;
+            box4closest = false;
+        }
+        if (averageP2 > averageP1 && averageP2 > averageP3 && averageP2 > averageP4) {
+            box1closest = false;
+            box2closest = true;
+            box3closest = false;
+            box4closest = false;
+        }
+        if (averageP3 > averageP1 && averageP3 > averageP2 && averageP3 > averageP4) {
+            box1closest = false;
+            box2closest = false;
+            box3closest = true;
+            box4closest = false;
+        }
+        if (averageP4 > averageP1 && averageP4 > averageP2 && averageP4 > averageP3) {
+            box1closest = false;
+            box2closest = false;
+            box3closest = false;
+            box4closest = true;
+        }
+        if (averageGP1 > averageGP2) {
+            gbox1closest = true;
+            gbox2closest = false;
+        }
+        if (averageGP2 > averageGP1) {
+            gbox1closest = false;
+            gbox2closest = true;
+        }
+
+        if (box1closest = true) {
+            ((Box) solarPanelOnewR.getChildren().get(1)).setMaterial(optimal);
+            ((Box) solarPanelTwowR.getChildren().get(1)).setMaterial(subOptimal);
+            ((Box) solarPanelThreewR.getChildren().get(1)).setMaterial(subOptimal);
+            ((Box) solarPanelFourwR.getChildren().get(1)).setMaterial(subOptimal);
+        }
+        if (box2closest = true) {
+            ((Box) solarPanelOnewR.getChildren().get(1)).setMaterial(subOptimal);
+            ((Box) solarPanelTwowR.getChildren().get(1)).setMaterial(optimal);
+            ((Box) solarPanelThreewR.getChildren().get(1)).setMaterial(subOptimal);
+            ((Box) solarPanelFourwR.getChildren().get(1)).setMaterial(subOptimal);
+
+        }
+        if (box3closest = true) {
+            ((Box) solarPanelOnewR.getChildren().get(1)).setMaterial(subOptimal);
+            ((Box) solarPanelTwowR.getChildren().get(1)).setMaterial(subOptimal);
+            ((Box) solarPanelThreewR.getChildren().get(1)).setMaterial(optimal);
+            ((Box) solarPanelFourwR.getChildren().get(1)).setMaterial(subOptimal);
+        }
+        if (box4closest = true) {
+            ((Box) solarPanelOnewR.getChildren().get(1)).setMaterial(subOptimal);
+            ((Box) solarPanelTwowR.getChildren().get(1)).setMaterial(subOptimal);
+            ((Box) solarPanelThreewR.getChildren().get(1)).setMaterial(subOptimal);
+            ((Box) solarPanelFourwR.getChildren().get(1)).setMaterial(optimal);
+        }
+        if (gbox1closest = true) {
+            ((Box) gPanelOneBox.getChildren().get(1)).setMaterial(optimal);
+            ((Box) gPanelTwoBox.getChildren().get(1)).setMaterial(subOptimal);
+        }
+        if (gbox2closest = true) {
+            ((Box) gPanelOneBox.getChildren().get(1)).setMaterial(subOptimal);
+            ((Box) gPanelTwoBox.getChildren().get(1)).setMaterial(optimal);
+        }
+    }
+
+    static double calculateLightIntesity(Box box, Group Sun){
+        double distance = Math.abs(distancecalc(box, Sun));
+        double intesity = 1/((distance)*(distance));
+        intesity = intesity*10000000;
+        return intesity;
     }
 
     public static void main(String[] args) {
