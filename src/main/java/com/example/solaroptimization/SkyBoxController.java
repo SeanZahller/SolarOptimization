@@ -10,6 +10,7 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Label;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -34,7 +35,7 @@ import static com.example.solaroptimization.SkyBoxApplication.sunTrajectory;
 public class SkyBoxController {
 
     @FXML
-    private static Pane skyboxPane;
+    static Pane skyboxPane;
     @FXML
     private Pane entireFrame;
     @FXML
@@ -101,32 +102,21 @@ public class SkyBoxController {
     }
 
     @FXML
-    protected Pane setSkyboxPane() throws ParseException {
-        Group skybox = new Group();
+    protected static Pane setSkyboxPane() throws ParseException {
+
+        Group skyBox = new Group();
+
         SkyBoxApplication.sunCreation(); //creating sun
-        skyboxPane = new Pane(SkyBoxApplication.sun, skybox);
+
         SkyBoxApplication.startParams(); // Setting start date, location, sunset/sunrise times
-        Group panelsWHouse = SkyBoxApplication.models(); //Creating all models for the scene
+        SkyBoxApplication.models(); //Creating all models for the scene
 
-        skybox.getChildren().addAll(SkyBoxApplication.sun, panelsWHouse);
-        SkyBoxApplication.constructWorld(skybox); // Construct the empty SkyBox group
+        ImageView[] views = SkyBoxApplication.layoutViews();
+        ImageView[] setViews = SkyBoxApplication.loadImageViews(views);
+        Group skyboxOut = SkyBoxApplication.createSkybox(setViews);
+        skyBox.getChildren().addAll(SkyBoxApplication.sun, SkyBoxApplication.panelsWHouse, skyboxOut);
 
-        //THIS causes an error: Duplicate children added so i commented it out. Its being out in skyboxPane above
-        //skyboxPane.getChildren().add(skybox);
-
-
-        //Heres where we do the set up camera and background?
-        //Could we move it into constructWorld?
-        //How to convert the things happening from a Scene to A AnchorPane or how to add a new scene into the Pane?
-
-        /*
-        skybox.setFill(new ImagePattern(SkyBoxApplication.skyboxImage));
-        camera = new PerspectiveCamera(true);
-        camera.setNearClip(0.1);
-        camera.setFarClip(30000.0);
-
-         */
-
+        skyboxPane = new Pane(skyBox);
 
         return skyboxPane;
     }

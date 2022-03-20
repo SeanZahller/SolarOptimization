@@ -1,11 +1,18 @@
 package com.example.solaroptimization;
 
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableFloatArray;
+import javafx.collections.ObservableIntegerArray;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point3D;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
+import javafx.scene.transform.Affine;
 import javafx.scene.transform.Transform;
 import javafx.stage.Stage;
 import com.interactivemesh.jfx.importer.tds.TdsModelImporter;
@@ -20,6 +27,8 @@ import javafx.scene.shape.*;
 import javafx.scene.transform.Rotate;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -30,10 +39,25 @@ import java.util.Date;
 
 public class SkyBoxApplication extends Application {
 
+    private static Image skyboxImage;
+    static Group root = new Group();
+    {
+        try {
+            skyboxImage = new Image(new FileInputStream("C:\\skyboxExample.png"));
+            //TODO confirm if I need this, I THINK it helps with blending the photo together for the skybox corners .
+//           final double width = skyboxImage.getWidth();
+//            final double height = skyboxImage.getHeight();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
     //camera controls and scene settings declarations
     private PerspectiveCamera camera;
     private Group cameraDolly;
     private final double cameraQuantity = 10.0;
+    private static final int WIDTH = 680;
+    private static final int HEIGHT = 849;
+    private static final int DEPTH = 700;
 
     //Mouse control variable declarations
     private double mousePosX;
@@ -42,6 +66,43 @@ public class SkyBoxApplication extends Application {
     private double mouseOldY;
     private double mouseDeltaX;
     private double mouseDeltaY;
+
+    //setting up for the folding of our image into a skybox
+    private static final Affine affine = new Affine();
+    private static final ImageView top   = new ImageView();
+    private static final ImageView bottom= new ImageView();
+    private static final ImageView left  = new ImageView();
+    private static final ImageView right = new ImageView();
+    private static final ImageView back  = new ImageView();
+    private static final ImageView front = new ImageView();
+    private static double size;
+    {
+        top.setId("top ");
+        bottom.setId("bottom ");
+        left.setId("left ");
+        right.setId("right ");
+        back.setId("back ");
+        front.setId("front ");
+    }
+
+    //aggregating these views into a list
+    private static final ImageView[] views = new ImageView[]
+            {
+                    top, left, back, right, front, bottom
+            };
+    private Image topImg;
+    private Image bottomImg;
+    private Image leftImg;
+    private Image rightImg;
+    private static ImageView frontImg;
+    private Image backImg;
+    private Image singleImg;
+
+
+    //private static final double depth = skyboxImage.getDepth(); //MAY NOT NEED FOR cube since shoudl scale evenly
+    private static final ObservableIntegerArray faces = FXCollections.observableIntegerArray();
+    private static final ObservableFloatArray texCords = FXCollections.observableFloatArray();
+    private static final ObservableFloatArray points = FXCollections.observableFloatArray();
 
     //Model Import Declaration
     private static final File house = new File("C:\\House.3ds");
@@ -58,7 +119,7 @@ public class SkyBoxApplication extends Application {
     static Group gPanelOneBox;
     static Group gPanelTwoBox;
     static Group panelsWHouse;
-    static Group sun;
+    static Group sun = new Group();
     private Boolean oneSelected = false;
     private Boolean twoSelected = false;
     static PhongMaterial clear = new PhongMaterial(Color.TRANSPARENT);
@@ -85,47 +146,105 @@ public class SkyBoxApplication extends Application {
     static PhongMaterial optimal = new PhongMaterial(Color.GREEN);
     static PhongMaterial subOptimal = new PhongMaterial(Color.RED);
 
+    private static void recalculateSize(double size) {
+        double factor = Math.floor(getSize()/size);
+        setSize(size * factor);
+    }
+    //build the box through translations and folding
+    protected static ImageView[] layoutViews()
+    {
+        for(ImageView view : views)
+        {
+            view.setFitWidth(getSize());
+            view.setFitHeight(getSize());
+        }
+
+
+        back.setTranslateX(-0.5 * getSize());
+        back.setTranslateY(-0.5 * getSize());
+        back.setTranslateZ(-0.5 * getSize());
+
+
+        front.setTranslateX(-0.5 * getSize());
+        front.setTranslateY(-0.5 * getSize());
+        front.setTranslateZ(0.5 * getSize());
+        front.setRotationAxis(Rotate.Z_AXIS);
+        front.setRotate(-180);
+        front.getTransforms().add(new Rotate(180,front.getFitHeight() / 2, 0,0, Rotate.X_AXIS));
+        front.setTranslateY(front.getTranslateY() - getSize());
+
+        top.setTranslateX(-0.5 * getSize());
+        top.setTranslateY(-1 * getSize());
+        top.setRotationAxis(Rotate.X_AXIS);
+        top.setRotate(-90);
+
+        bottom.setTranslateX(-0.5 * getSize());
+        bottom.setTranslateY(0);
+        bottom.setRotationAxis(Rotate.X_AXIS);
+        bottom.setRotate(90);
+
+        left.setTranslateX(-1 * getSize());
+        left.setTranslateY(-0.5 * getSize());
+        left.setRotationAxis(Rotate.Y_AXIS);
+        left.setRotate(90);
+
+        right.setTranslateX(0);
+        right.setTranslateY(-0.5 * getSize());
+        right.setRotationAxis(Rotate.Y_AXIS);
+        right.setRotate(-90);
+
+
+        //  layout.getChildren().addAll(views)
+        return views;
+    }
+
+    public static final double getSize()
+    {
+        return size;
+    }
+
+    public static final void setSize(double value)
+    {
+        size = value;
+    }
 
     @Override
     public void start(Stage stage) throws IOException, ParseException {
+
         FXMLLoader fxmlLoader = new FXMLLoader(SkyBoxApplication.class.getResource("skybox-viewUI.fxml"));
         Pane entireFrame = new Pane();
-        Group root = new Group(); //TODO: make thie borderpane the root, but load the fxmlL
-        Scene scene = new Scene(root, 1024, 768); // Make the whole scene with everything
-        entireFrame.getChildren().add(fxmlLoader.load());
+        Pane skyboxPane = new Pane();
 
-        root.getChildren().addAll(entireFrame);
-        scene.setRoot(root);
+        try {
+            skyboxPane = SkyBoxController.setSkyboxPane();
+            cameraDolly = new Group();
+            cameraDolly.setTranslateZ(-1500);
+            cameraDolly.setTranslateY(400);
+            cameraDolly.setTranslateX(500);
+            camera = new PerspectiveCamera(true); //TODO could make into skyboxCamera and regular perspective camera to make sure it is adjusting visuals corretly
+            camera.setNearClip(0.1);
+            camera.setFarClip(30000.0);
+            skyboxPane.getChildren().addAll(cameraDolly);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
 
+        entireFrame.getChildren().addAll(skyboxPane);
 
-        // This needs to set up the inside of the skyboxPane?
-        camera = new PerspectiveCamera(true);
-        camera.setNearClip(0.1);
-        camera.setFarClip(30000.0);
-        //sceneRoot.getScene().setCamera(camera);
-        root.getScene().setCamera(camera);
-        // translations through dolly
-        cameraDolly = new Group();
-        cameraDolly.setTranslateZ(-1000);
-        cameraDolly.setTranslateX(200);
-        // rotation transforms
         Group turn = new Group();
         Rotate xRotate = new Rotate(0, 0, 0, 0, Rotate.X_AXIS);
         Rotate yRotate = new Rotate(0, 0, 0, 0, Rotate.Y_AXIS);
-        camera.getTransforms().addAll(xRotate);
+        cameraDolly.getTransforms().addAll(xRotate);
         turn.getTransforms().addAll(yRotate);
 
-        //sceneRoot.getChildren().add(cameraDolly);
-        root.getChildren().add(cameraDolly);
-        cameraDolly.getChildren().add(turn);
-        turn.getChildren().add(camera);
+        Scene scene = new Scene(root, 1024, 768); // Make the whole scene with everything
+
 
         //-------------END of Scene and Camera set up----------------------------//
 
         //----------------Controls Section----------------------------//
 
         // Use keyboard to control camera position
-        //scene.getRoot().setOnKeyPressed(event -> { ???????????????????????????? scene.getRoot() put controls in the anchorPane?
         scene.setOnKeyPressed(event -> {
             double change = cameraQuantity;
             KeyCode keycode = event.getCode();
@@ -161,6 +280,17 @@ public class SkyBoxApplication extends Application {
             }
             if (keycode == KeyCode.S) {
                 delta = new Point3D(0, change, 0);
+            }
+            if (keycode == KeyCode.Q) {                     //rotate camera clockwise
+                r = new Rotate(-1, Rotate.Y_AXIS);
+                t = t.createConcatenation(r);
+                camera.getTransforms().addAll(t);
+            }
+            //TODO make a path for the camera to follow in a sphere around the house based on current distance, opposite direction of Q
+            if (keycode == KeyCode.E) {                     //rotate camera counterclockwise
+                r = new Rotate(+1, Rotate.Y_AXIS);
+                t = t.createConcatenation(r);
+                camera.getTransforms().addAll(t);
             }
             if (keycode == KeyCode.M) { //Rotate house and all solar panels Right
                 t = t.createConcatenation(l);
@@ -236,11 +366,11 @@ public class SkyBoxApplication extends Application {
             }
         });
 
-        // Use mouse to control camera rotation
         scene.setOnMousePressed(me -> {
             mousePosX = me.getSceneX();
             mousePosY = me.getSceneY();
         });
+
 
         scene.setOnMouseDragged(me -> {
             mouseOldX = mousePosX;
@@ -254,113 +384,22 @@ public class SkyBoxApplication extends Application {
             xRotate.setAngle(((xRotate.getAngle() + mouseDeltaY * 0.2) % 360 + 540) % 360 - 180); // -
         });
 
+        root.getScene().setCamera(camera);
+        root.getChildren().add(cameraDolly);
+        cameraDolly.getChildren().add(turn);
+        turn.getChildren().add(camera);
+
+        entireFrame.getChildren().add(fxmlLoader.load());
+
+        root.getChildren().addAll(entireFrame);
+        scene.setRoot(root);
+
         stage.setTitle("Solar Optimization Simulator!");
         stage.setScene(scene);
         stage.show();
     }
 
-    static void constructWorld(Group root) {
-        AmbientLight light = new AmbientLight(Color.rgb(160, 160, 160));
 
-        PointLight pl = new PointLight();
-        pl.setTranslateX(100);
-        pl.setTranslateY(-100);
-        pl.setTranslateZ(-100);
-        root.getChildren().add(pl);
-
-        final PhongMaterial greenMaterial = new PhongMaterial();
-        greenMaterial.setDiffuseColor(Color.FORESTGREEN);
-        greenMaterial.setSpecularColor(Color.LIMEGREEN);
-        Box xAxis = new Box(500, 10, 10);
-        xAxis.setMaterial(greenMaterial);
-        Box yAxis = new Box(10, 200, 10);
-        yAxis.setMaterial(greenMaterial);
-        Box zAxis = new Box(10, 10, 200);
-        zAxis.setMaterial(greenMaterial);
-
-        final PhongMaterial redMaterial = new PhongMaterial();
-        redMaterial.setDiffuseColor(Color.RED);
-        redMaterial.setSpecularColor(Color.TOMATO);
-        final Sphere sphere = new Sphere(30);
-        sphere.setMaterial(redMaterial);
-
-        sphere.setTranslateX(150);
-
-        final PhongMaterial yellowMaterial = new PhongMaterial();
-        yellowMaterial.setDiffuseColor(Color.rgb(200, 200, 0));
-        // yellowMaterial.setDiffuseColor(Color.YELLOW);
-        // yellowMaterial.setSpecularColor(Color.WHITE);
-        final Sphere sphere2 = new Sphere(30);
-        sphere2.setMaterial(yellowMaterial);
-        // sphere2.setDrawMode(DrawMode.LINE);
-
-        sphere2.setTranslateX(110);
-
-        // Example from JavaFX for Dummies
-        TriangleMesh pyramidMesh = new TriangleMesh();
-        // define (a trivial) texture map
-        pyramidMesh.getTexCoords().addAll(
-                0.5f, 0,
-                0, 0.5f,
-                1, 0.5f,
-                0, 1,
-                1, 1
-        );
-        // define vertices
-        float h = 100;                    // Height
-        float s = 200;                    // Base hypotenuse
-        pyramidMesh.getPoints().addAll(
-                0, 0, 0,            // Point 0 - Top
-                0, h, -s / 2,         // Point 1 - Front
-                -s / 2, h, 0,            // Point 2 - Left
-                s / 2, h, 0,            // Point 3 - Right
-                0, h, s / 2           // Point 4 - Back
-        );
-        // define faces
-        pyramidMesh.getFaces().addAll(
-                0, 0, 2, 1, 1, 2,          // Front left face
-                0, 0, 1, 1, 3, 1,          // Front right face
-                0, 0, 3, 1, 4, 2,          // Back right face
-                0, 0, 4, 1, 2, 2,          // Back left face
-                4, 1, 1, 4, 2, 2,          // Bottom left face
-                4, 1, 3, 3, 1, 4           // Bottom right face
-        );
-        pyramidMesh.getFaceSmoothingGroups().addAll(
-                1, 2, 3, 4, 5, 5);
-        MeshView pyramid = new MeshView(pyramidMesh);
-        //pyramid.setDrawMode(DrawMode.LINE);
-        final PhongMaterial pyrMaterial = new PhongMaterial();
-        //pyrMaterial.setDiffuseMap(new Image("pyr_tex.png")); //TODO missing this image, need to determine the diffuse map
-        pyrMaterial.setDiffuseColor(Color.BLUE);
-        pyrMaterial.setSpecularColor(Color.WHITE);
-        pyramid.setMaterial(pyrMaterial);
-        pyramid.setTranslateX(-50);
-        pyramid.setTranslateY(-200);
-        pyramid.setTranslateZ(0);
-        //  root.getChildren().add(pyramid);
-
-        final PhongMaterial blueMaterial = new PhongMaterial();
-        blueMaterial.setDiffuseColor(Color.BLUE);
-        blueMaterial.setSpecularColor(Color.WHITE);
-        Box box = new Box(40, 60, 80);
-        box.setMaterial(blueMaterial);
-
-        box.setTranslateX(-30);
-        box.setTranslateY(-20);
-        box.setTranslateZ(-20);
-
-        root.getChildren().add(light);
-
-        //Image back = new Image(String.valueOf(SkyBoxApplication.class.getResource("skyboxDesert.png")));
-        Image back2 = new Image("file:skyboxDesert.png");
-        final PhongMaterial skyMaterial = new PhongMaterial();
-        skyMaterial.setDiffuseMap(back2);
-        Box skybox = new Box(10000, 10000, 10000);
-        skybox.setMaterial(skyMaterial);
-        skybox.setCullFace(CullFace.NONE);
-        root.getChildren().add(skybox);
-
-    }
 
     private static Group setHouse() {
         TdsModelImporter modelImporter = new TdsModelImporter(); //Model Importer
@@ -396,8 +435,8 @@ public class SkyBoxApplication extends Application {
             node.setTranslateY(pY); // Move Up or down ... Height of roof
             node.setTranslateZ(pZ); // Move forward or backward
         }
-        solarPanelImport = new Group(model);
-        return solarPanelImport;
+        Group panel = new Group(model);
+        return panel;
     }
 
     private static Box createsolar(Group group1, double height, double depth, double width, double rax, double raz, double ray) {
@@ -412,6 +451,60 @@ public class SkyBoxApplication extends Application {
         box.setWidth(width);
         box.setMaterial(clear);
         return box;
+    }
+
+    protected static ImageView[] loadImageViews(ImageView[] views) {
+        top.setImage(views[0].getImage());
+        left.setImage(views[1].getImage());
+        back.setImage(views[2].getImage());
+        right.setImage(views[3].getImage());
+        front.setImage(views[4].getImage());
+        bottom.setImage(views[5].getImage());
+        //   Group skyboxViews = new Group();
+
+        for (ImageView imageView : views) {
+
+
+            imageView.setScaleX(10);
+            imageView.setScaleY(10);
+            imageView.setScaleZ(10);
+            imageView.setSmooth(true);
+            imageView.setPreserveRatio(true);
+              //skyboxViews.getChildren().add(imageView);
+        }
+
+        return views;
+
+
+    }
+    public static Group createSkybox(ImageView[] setViews)
+    {
+        TriangleMesh cube = new TriangleMesh();
+
+        PhongMaterial skyboxMaterial = new PhongMaterial();
+
+        Box box = new Box(WIDTH, HEIGHT, DEPTH);
+
+        layoutViews();
+        loadImageViews(setViews);
+
+        skyboxMaterial.setDiffuseMap(skyboxImage);
+
+        box.setTranslateX(WIDTH);
+        box.setTranslateY(HEIGHT);
+        box.setTranslateZ(18500);
+        box.setScaleX(10);
+        box.setScaleY(10);
+        box.setScaleZ(10);
+        box.setMaterial(skyboxMaterial);
+        box.toBack();
+
+        box.setCullFace(CullFace.FRONT);
+
+        Group skybox = new Group();
+        skybox.getChildren().add(box);
+
+        return skybox;
     }
 
     private void setCenters(Rotate r, Group beingRotated) {
@@ -448,7 +541,7 @@ public class SkyBoxApplication extends Application {
         sunsetTime = calculator.getOfficialSunsetForDate(cal); // Gets sunset based on date and calculator created
     }
 
-    static Group models() {
+    static void models() {
 
         int rightSideAngles[] = {-68, -68, 0};
 
@@ -490,8 +583,9 @@ public class SkyBoxApplication extends Application {
         gPanelTwoBox = new Group(gPanelTwo, boxers6);
 
         panelsWHouse = new Group(houseImport, solarPanelOnewR, solarPanelTwowR, solarPanelThreewR, solarPanelFourwR, gPanelOneBox, gPanelTwoBox);
-        panelsWHouse.setTranslateY(-200); // puts house at 0,0,0... If you comment this it shows models on screen
-        return panelsWHouse;
+        panelsWHouse.setTranslateY(500); // puts house at ground level.. If you comment this it removes models on screen
+        panelsWHouse.setTranslateX(400); // puts house at ground level.. If you comment this out it removes models on screen
+        panelsWHouse.setTranslateZ(-400);
     }
 
     static void sunCreation() {
@@ -504,14 +598,15 @@ public class SkyBoxApplication extends Application {
         PointLight pointlight = new PointLight();
 
         // create a Group
-        sun = new Group(sphere, pointlight);
+        sun.getChildren().addAll(sphere, pointlight);
 
         sphere.setTranslateX(100);
         sphere.setTranslateY(-200);
+
         pointlight.setTranslateZ(-1000);
         pointlight.setTranslateX(+1000);
         pointlight.setTranslateY(+10);
-        pointlight.setColor(Color.YELLOW);
+        pointlight.setColor(Color.rgb(255, 255, 255));
 
     }
 
@@ -961,6 +1056,7 @@ public class SkyBoxApplication extends Application {
         intesity = intesity*10000000;
         return intesity;
     }
+
 
     public static void main(String[] args) {
         launch(args);
