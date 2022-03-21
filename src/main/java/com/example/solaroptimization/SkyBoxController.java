@@ -27,6 +27,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Calendar;
 
 import static com.example.solaroptimization.SkyBoxApplication.clear;
 import static com.example.solaroptimization.SkyBoxApplication.sunTrajectory;
@@ -53,6 +54,8 @@ public class SkyBoxController {
     @FXML
     private TextField theLocationPicker;
     @FXML
+    private TextField tz;
+    @FXML
     private Button paybackPeriod;
     @FXML
     private Button optimalPanels;
@@ -73,6 +76,7 @@ public class SkyBoxController {
     private static String convertedSunrise;
     private static String convertedSunset;
     private static Boolean pressed = false;
+    private static Boolean pressedTwo = false;
     private static Boolean pm = false;
 
 
@@ -88,11 +92,11 @@ public class SkyBoxController {
         slider.setMax(hoursBetweenRiseSet + 1);
 
         //Initialize currentTime and current sun position with the time
-        changeHour(6, 0);
+        changeTime(6, 0);
         sunTrajectory(6.0);
 
         //Create variables to show converted sunrise and sunset strings
-        convertTimes();
+       // convertTimes();
 
     }
 
@@ -115,6 +119,7 @@ public class SkyBoxController {
         ImageView[] setViews = SkyBoxApplication.loadImageViews(views);
         Group skyboxOut = SkyBoxApplication.createSkybox(setViews);
         skyBox.getChildren().addAll(SkyBoxApplication.sun, SkyBoxApplication.panelsWHouse, skyboxOut);
+        //skyBox.getChildren().addAll(SkyBoxApplication.sun, SkyBoxApplication.panelsWHouse);
 
         skyboxPane = new Pane(skyBox);
 
@@ -135,10 +140,8 @@ public class SkyBoxController {
         String[] coords = SkyBoxApplication.theLocation.split(",");
         SkyBoxApplication.latitude = Double.parseDouble(coords[0]);
         SkyBoxApplication.longitude = Double.parseDouble(coords[1]);
-        System.out.println(SkyBoxApplication.latitude);
-        System.out.println(SkyBoxApplication.longitude);
 
-        recalculateSunTimes();
+        //recalculateSunTimes();
     }
 
     public void showPP(ActionEvent actionEvent) {
@@ -177,7 +180,8 @@ public class SkyBoxController {
         solarP4Intensity = SkyBoxApplication.calculateLightIntesity((Box) SkyBoxApplication.solarPanelFourwR.getChildren().get(1), SkyBoxApplication.sun);
         solarGP1Intensity = SkyBoxApplication.calculateLightIntesity((Box) SkyBoxApplication.gPanelOneBox.getChildren().get(1), SkyBoxApplication.sun);
         solarGP2Intensity = SkyBoxApplication.calculateLightIntesity((Box) SkyBoxApplication.gPanelTwoBox.getChildren().get(1), SkyBoxApplication.sun);
-        if(pressed == false)
+
+        if(pressedTwo == false)
         {
             getLevels(solarP1Intensity, (Box) SkyBoxApplication.solarPanelOnewR.getChildren().get(1));
             getLevels(solarP2Intensity, (Box) SkyBoxApplication.solarPanelTwowR.getChildren().get(1));
@@ -185,9 +189,10 @@ public class SkyBoxController {
             getLevels(solarP4Intensity, (Box) SkyBoxApplication.solarPanelFourwR.getChildren().get(1));
             getLevels(solarGP1Intensity, (Box) SkyBoxApplication.gPanelOneBox.getChildren().get(1));
             getLevels(solarGP2Intensity, (Box) SkyBoxApplication.gPanelTwoBox.getChildren().get(1));
-            pressed = true;
+            pressedTwo = true;
         }
-        if(pressed == true) {
+
+        else if(pressedTwo == true) {
             ((Box) SkyBoxApplication.solarPanelOnewR.getChildren().get(1)).setMaterial(clear);
             ((Box) SkyBoxApplication.solarPanelTwowR.getChildren().get(1)).setMaterial(clear);
             ((Box) SkyBoxApplication.solarPanelThreewR.getChildren().get(1)).setMaterial(clear);
@@ -195,8 +200,10 @@ public class SkyBoxController {
             ((Box) SkyBoxApplication.gPanelOneBox.getChildren().get(1)).setMaterial(clear);
             ((Box) SkyBoxApplication.gPanelTwoBox.getChildren().get(1)).setMaterial(clear);
 
-            pressed = false;
+            pressedTwo = false;
         }
+
+
     }
 
     public void showSunTimes(ActionEvent actionEvent) {
@@ -205,8 +212,8 @@ public class SkyBoxController {
                 "On " + SkyBoxApplication.date.toString() + "\n"
                         + "at latitude: " + SkyBoxApplication.latitude + ", and longitude: " + SkyBoxApplication.longitude + ":\n"
                         + "\n"
-                        + "Sunrise: " + convertedSunrise + "\n"
-                        + "Sunset: " + convertedSunset;
+                        + "Sunrise: " + SkyBoxApplication.sunriseTime + "\n"
+                        + "Sunset: " + SkyBoxApplication.sunsetTime;
 
         JOptionPane.showMessageDialog(null, sunTimes, "Sunrise/Sunset Times", JOptionPane.PLAIN_MESSAGE);
     }
@@ -276,7 +283,8 @@ public class SkyBoxController {
     }
 
     public void getTimeZone(ActionEvent actionEvent) {
-        SkyBoxApplication.timeZone = actionEvent.getTarget().toString();
+        SkyBoxApplication.theLocation = theLocationPicker.getText();
+        SkyBoxApplication.timeZone = tz.getText();
         recalculateSunTimes();
     }
 
@@ -284,18 +292,22 @@ public class SkyBoxController {
 
     private void recalculateSunTimes() {
 
+        SkyBoxApplication.cal.clear();
         SkyBoxApplication.cal.setTime(SkyBoxApplication.date); //Calender object given corresponding date
 
         SkyBoxApplication.location = new Location(SkyBoxApplication.latitude, SkyBoxApplication.longitude); // Will be entered in coordinates
+        System.out.println(SkyBoxApplication.location.getLatitude());
         SunriseSunsetCalculator calculator = new SunriseSunsetCalculator(SkyBoxApplication.location, SkyBoxApplication.timeZone); // Creates calculator for sun times
+        System.out.println(SkyBoxApplication.timeZone.toString());
 
         SkyBoxApplication.sunriseTime = calculator.getOfficialSunriseForDate(SkyBoxApplication.cal); // Gets sunrise based on date and calculator created
         SkyBoxApplication.sunsetTime = calculator.getOfficialSunsetForDate(SkyBoxApplication.cal); // Gets sunset based on date and calculator created
 
-        LocalTime start = LocalTime.parse(SkyBoxApplication.sunriseTime);
-        LocalTime end =  LocalTime.parse(SkyBoxApplication.sunsetTime);
-        Long hours = ChronoUnit.HOURS.between(start, end);
-        slider.setMax(hours);
+        //Initialize currentTime and current sun position with the time
+        changeTime(6, 0);
+        sunTrajectory(6.0);
+
+
     }
 
     public void sunMovement() {
@@ -303,143 +315,168 @@ public class SkyBoxController {
         double sliderValue = slider.getValue();
         if(sliderValue == 0)
         {
-            changeHour(0, 0);
+            changeTime(0, 0);
             sunTrajectory(0.0);
         }
         else if(sliderValue == .5)
         {
-            changeHour(0, 30);
+            changeTime(0, 30);
             sunTrajectory(sliderValue);
         }
         else if(sliderValue == 1.5)
         {
-            changeHour(1, 30);
+            changeTime(1, 30);
             sunTrajectory(sliderValue);
         }
         else if(sliderValue == 1)
         {
-            changeHour(1, 0);
+            changeTime(1, 0);
             sunTrajectory(sliderValue);
         }
         else if(sliderValue == 2.5)
         {
-            changeHour(2, 30);
+            changeTime(2, 30);
             sunTrajectory(sliderValue);
         }
         else if(sliderValue == 2)
         {
-            changeHour(2, 0);
+            changeTime(2, 0);
             sunTrajectory(sliderValue);
         }
         else if(sliderValue == 3.5)
         {
-            changeHour(3, 30);
+            changeTime(3, 30);
             sunTrajectory(sliderValue);
         }
         else if(sliderValue == 3)
         {
-            changeHour(3, 0);
+            changeTime(3, 0);
             sunTrajectory(sliderValue);
         }
         else if(sliderValue == 4.5)
         {
-            changeHour(4, 30);
+            changeTime(4, 30);
             sunTrajectory(sliderValue);
         }
         else if(sliderValue == 4)
         {
-            changeHour(4, 0);
+            changeTime(4, 0);
             sunTrajectory(sliderValue);
         }
         else if(sliderValue == 5.5)
         {
-            changeHour(5, 30);
+            changeTime(5, 30);
             sunTrajectory(sliderValue);
         }
         else if(sliderValue == 5)
         {
-            changeHour(5, 0);
+            changeTime(5, 0);
             sunTrajectory(sliderValue);
         }
         else if(sliderValue == 6.5)
         {
-            changeHour(6, 30);
+            changeTime(6, 30);
             sunTrajectory(sliderValue);
         }
         else if(sliderValue == 6)
         {
-            changeHour(6, 0);
+            changeTime(6, 0);
             sunTrajectory(sliderValue);
         }
         else if(sliderValue == 7.5)
         {
-            changeHour(7, 30);
+            changeTime(7, 30);
             sunTrajectory(sliderValue);
         }
         else if(sliderValue == 7)
         {
-            changeHour(7, 0);
+            changeTime(7, 0);
             sunTrajectory(sliderValue);
         }
         else if(sliderValue == 8.5)
         {
-            changeHour(8, 30);
+            changeTime(8, 30);
             sunTrajectory(sliderValue);
         }
         else if(sliderValue == 8)
         {
-            changeHour(8, 0);
+            changeTime(8, 0);
             sunTrajectory(sliderValue);
         }
         else if(sliderValue == 9.5)
         {
-            changeHour(9, 30);
+            changeTime(9, 30);
             sunTrajectory(sliderValue);
         }
         else if(sliderValue == 9)
         {
-            changeHour(9, 0);
+            changeTime(9, 0);
             sunTrajectory(sliderValue);
         }
         else if(sliderValue == 10.5)
         {
-            changeHour(10, 30);
+            changeTime(10, 30);
             sunTrajectory(sliderValue);
         }
         else if(sliderValue == 10)
         {
-            changeHour(10, 0);
+            changeTime(10, 0);
             sunTrajectory(sliderValue);
 
         }
         else if(sliderValue == 11)
         {
-            changeHour(11, 0);
+            changeTime(11, 0);
             sunTrajectory(sliderValue);
         }
         else if(sliderValue == 11.5)
         {
-            changeHour(11, 30);
+            changeTime(11, 30);
             sunTrajectory(sliderValue);
         }
         else if(sliderValue == 12)
         {
-            changeHour(12, 0);
+            changeTime(12, 0);
             sunTrajectory(sliderValue);
         }
         else if(sliderValue == 12.5)
         {
-            changeHour(12, 30);
+            changeTime(12, 30);
             sunTrajectory(sliderValue);
         }
         else if(sliderValue == 13)
         {
-            changeHour(13, 0);
+            changeTime(13, 0);
             sunTrajectory(sliderValue);
         }
 
     }
 
+
+    public void changeTime(int currentHour, int currentMin){
+        String startTime = SkyBoxApplication.sunriseTime;
+        String[] wholeTime = startTime.split(":");
+
+        int hour = Integer.parseInt(wholeTime[0]);
+        int min = Integer.parseInt(wholeTime[1]);
+        int newHour = hour + currentHour;
+        int newMin = min + currentMin;
+
+        StringBuilder timeMaker = new StringBuilder(newHour + ":" + newMin);
+        currentTime = timeMaker.toString();
+
+        if(currentTime.length() < 5)
+        {
+            String str = String.format("%1s",currentTime);
+            str = str.replace(' ','0');
+
+            currentTimeLabel.setText(str);
+        }
+        else
+        currentTimeLabel.setText(currentTime);
+
+    }
+/*
     public void changeHour(int currentHour, int minToAdd){
         String startTime = SkyBoxApplication.sunriseTime;
         String[] wholeTime = startTime.split(":");
@@ -513,6 +550,8 @@ public class SkyBoxController {
         }
 
     }
+
+ */
 
     private void getLevels(double intensity, Box box){
 

@@ -10,6 +10,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
 
+<?import javafx.scene.image.Image?>
 <Pane fx:id="entireFrame" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="768.0" prefWidth="1024.0" style="-fx-border-color: black;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.solaroptimization.SkyBoxController">
    <children>
       <AnchorPane fx:id="sliderAndDate" layoutY="39.0" minHeight="0.0" minWidth="0.0" prefHeight="51.0" prefWidth="1024.0" style="-fx-background-color: linear-gradient(to right, indigo 20%, red 70%, indigo 100%); -fx-border-color: black;">
@@ -70,7 +71,7 @@
                   <Font name="Georgia Italic" size="15.0" />
                </font>
             </Label>
-            <TextField fx:id="timezone" alignment="CENTER" layoutX="14.0" layoutY="188.0" onAction="#getTimeZone" promptText="GMT-8" />
+            <TextField fx:id="tz" alignment="CENTER" layoutX="14.0" layoutY="188.0" onAction="#getTimeZone" promptText="GMT-8" />
             <Button fx:id="quit" layoutX="8.0" layoutY="613.0" mnemonicParsing="false" onAction="#exitProgram" prefHeight="38.0" prefWidth="159.0" style="-fx-background-color: red;" text="QUIT" textFill="WHITE">
                <font>
                   <Font name="System Bold" size="14.0" />
@@ -92,7 +93,7 @@
          <effect>
             <ImageInput>
                <source>
-
+                  <Image url="@skyboxDesert.png" />
                </source>
             </ImageInput>
          </effect>

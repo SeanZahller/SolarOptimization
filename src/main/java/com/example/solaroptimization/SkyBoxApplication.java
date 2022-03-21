@@ -213,31 +213,31 @@ public class SkyBoxApplication extends Application {
 
         FXMLLoader fxmlLoader = new FXMLLoader(SkyBoxApplication.class.getResource("skybox-viewUI.fxml"));
         Pane entireFrame = new Pane();
-        Pane skyboxPane = new Pane();
+        //Pane skyboxPane = new Pane();
 
         try {
-            skyboxPane = SkyBoxController.setSkyboxPane();
-            cameraDolly = new Group();
-            cameraDolly.setTranslateZ(-1500);
-            cameraDolly.setTranslateY(400);
-            cameraDolly.setTranslateX(500);
-            camera = new PerspectiveCamera(true); //TODO could make into skyboxCamera and regular perspective camera to make sure it is adjusting visuals corretly
-            camera.setNearClip(0.1);
-            camera.setFarClip(30000.0);
-            skyboxPane.getChildren().addAll(cameraDolly);
+            SkyBoxController.skyboxPane = SkyBoxController.setSkyboxPane();
+        //    cameraDolly = new Group();
+        //    cameraDolly.setTranslateZ(-1500);
+        //    cameraDolly.setTranslateY(400);
+       //     cameraDolly.setTranslateX(500);
+        //    camera = new PerspectiveCamera(true); //TODO could make into skyboxCamera and regular perspective camera to make sure it is adjusting visuals corretly
+        //    camera.setNearClip(0.1);
+         //   camera.setFarClip(30000.0);
+           // skyboxPane.getChildren().addAll(cameraDolly);
         } catch (ParseException e) {
             e.printStackTrace();
         }
 
-        entireFrame.getChildren().addAll(skyboxPane);
+        entireFrame.getChildren().addAll(SkyBoxController.skyboxPane);
 
         Group turn = new Group();
         Rotate xRotate = new Rotate(0, 0, 0, 0, Rotate.X_AXIS);
         Rotate yRotate = new Rotate(0, 0, 0, 0, Rotate.Y_AXIS);
-        cameraDolly.getTransforms().addAll(xRotate);
-        turn.getTransforms().addAll(yRotate);
+       // cameraDolly.getTransforms().addAll(xRotate);
+       // turn.getTransforms().addAll(yRotate);
 
-        Scene scene = new Scene(root, 1024, 768); // Make the whole scene with everything
+        Scene scene = new Scene(root, 1024, 620); // Make the whole scene with everything
 
 
         //-------------END of Scene and Camera set up----------------------------//
@@ -365,7 +365,7 @@ public class SkyBoxApplication extends Application {
 
             }
         });
-
+/*
         scene.setOnMousePressed(me -> {
             mousePosX = me.getSceneX();
             mousePosY = me.getSceneY();
@@ -383,11 +383,11 @@ public class SkyBoxApplication extends Application {
             yRotate.setAngle(((yRotate.getAngle() - mouseDeltaX * 0.2) % 360 + 540) % 360 - 180); // +
             xRotate.setAngle(((xRotate.getAngle() + mouseDeltaY * 0.2) % 360 + 540) % 360 - 180); // -
         });
-
-        root.getScene().setCamera(camera);
-        root.getChildren().add(cameraDolly);
-        cameraDolly.getChildren().add(turn);
-        turn.getChildren().add(camera);
+*/
+       // root.getScene().setCamera(camera);
+       // root.getChildren().add(cameraDolly);
+       // cameraDolly.getChildren().add(turn);
+       // turn.getChildren().add(camera);
 
         entireFrame.getChildren().add(fxmlLoader.load());
 
@@ -596,9 +596,11 @@ public class SkyBoxApplication extends Application {
 
         // create a point light
         PointLight pointlight = new PointLight();
+        AmbientLight light = new AmbientLight(Color.rgb(255, 255, 255));
+
 
         // create a Group
-        sun.getChildren().addAll(sphere, pointlight);
+        sun.getChildren().addAll(sphere, pointlight, light);
 
         sphere.setTranslateX(100);
         sphere.setTranslateY(-200);
