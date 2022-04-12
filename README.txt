@@ -39,6 +39,11 @@ target = target folder
 
 Program should now run, If not restart and look for load maven project tip, and redo any steps necessary.
 
-In Current State: 3D environment needs to be made in the white 2D square the house is in, Skybox failed folding code and camera controls commented out
-
-
+UPDATE/To Work On:
+*SkyBox needs better folding
+*Error checking on sunrise/sunset times
+*Refactor into neater code/seperate classes
+*Change military time to digital time
+*UI Tweaks: Button spacing, fonts, size, etc.
+*Moving roof solar panels
+*Individually add/remove ground or roof solar panel
