@@ -1,5 +1,6 @@
 Solar Optimization Simulator
 Created by Mark Capka, Sean Zahller, Anthony Hirt, and Josh Canton
+Seperate Project Repository Individually created/changed by Sean Zahller
 EWU Senior Project 2022 Winter Quarter
 
 Program is meant to show the user details of how sunlight will affect a house at a certain location and time.
