@@ -1,6 +1,5 @@
 package com.example.solaroptimization;
 
-
 import javafx.scene.AmbientLight;
 import javafx.scene.Group;
 import javafx.scene.image.Image;

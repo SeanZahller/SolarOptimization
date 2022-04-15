@@ -1,15 +1,19 @@
 package com.example.solaroptimization;
 
+import com.luckycatlabs.sunrisesunset.SunriseSunsetCalculator;
 import com.luckycatlabs.sunrisesunset.dto.Location;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
+
+import static com.example.solaroptimization.SkyBoxApplication.slider;
 
 public class TimeUtils {
 
@@ -69,6 +73,39 @@ public class TimeUtils {
             currentTimeLabel.setText(currentTime);
 
         System.out.println(currentTimeLabel);
+    }
+
+    public static void getLocation() {
+        TimeUtils.theLocation = TimeUtils.locationPicker.getText();
+        String[] coords = TimeUtils.theLocation.split(",");
+        TimeUtils.latitude = Double.parseDouble(coords[0]);
+        TimeUtils.longitude = Double.parseDouble(coords[1]);
+
+        SunUtils.recalculateSunTimes();
+    }
+
+    static void startParams() throws ParseException {
+        //Choosing Spokane 3/10/22 as starting place and time
+        DateFormat formatter = new SimpleDateFormat("yyyyMMdd"); //Formatter
+        TimeUtils.date = formatter.parse(TimeUtils.theDate); //Parse string to create Date object
+        TimeUtils.cal = Calendar.getInstance(); //Calendar object created
+        TimeUtils.cal.setTime(TimeUtils.date); //Calender object given corresponding date
+
+        TimeUtils.location = new Location(TimeUtils.latitude.doubleValue(), TimeUtils.longitude.doubleValue()); // Will be entered in coordinates
+        SunriseSunsetCalculator calculator = new SunriseSunsetCalculator(TimeUtils.location, TimeUtils.timeZone); // Creates calculator for sun times
+
+        TimeUtils.sunriseTime = calculator.getOfficialSunriseForDate(TimeUtils.cal); // Gets sunrise based on date and calculator created
+        TimeUtils.sunsetTime = calculator.getOfficialSunsetForDate(TimeUtils.cal); // Gets sunset based on date and calculator created
+
+        //Initialize Slider Ticks
+        LocalTime start = LocalTime.parse(TimeUtils.sunriseTime);
+        LocalTime end =  LocalTime.parse(TimeUtils.sunsetTime);
+        Long hoursBetweenRiseSet = ChronoUnit.HOURS.between(start, end);
+        slider.setMax(hoursBetweenRiseSet + 1);
+
+        //Initialize currentTime and current sun position with the time
+        TimeUtils.changeTime(6, 0);
+        SunUtils.sunTrajectory(6.0);
     }
 
 }
