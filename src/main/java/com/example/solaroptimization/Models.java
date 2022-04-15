@@ -2,7 +2,6 @@ package com.example.solaroptimization;
 
 import javafx.scene.Group;
 import javafx.scene.shape.Box;
-
 import java.io.File;
 
 public class Models {

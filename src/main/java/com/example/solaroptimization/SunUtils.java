@@ -2,7 +2,6 @@ package com.example.solaroptimization;
 
 import com.luckycatlabs.sunrisesunset.SunriseSunsetCalculator;
 import com.luckycatlabs.sunrisesunset.dto.Location;
-
 import static com.example.solaroptimization.TimeUtils.changeTime;
 
 public class SunUtils {
